@@ -2,3 +2,6 @@
 /.idea
 /out
 *.iml
+/src/ru/gb/jtwo/lone/online/Animal.java
+/src/ru/gb/jtwo/lone/online/Cat.java
+/src/ru/gb/jtwo/lone/online/Main.java
