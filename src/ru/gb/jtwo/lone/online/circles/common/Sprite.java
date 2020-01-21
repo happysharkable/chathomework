@@ -1,8 +1,8 @@
-package ru.gb.jtwo.lone.online.circles;
+package ru.gb.jtwo.lone.online.circles.common;
 
 import java.awt.*;
 
-public class Sprite {
+public class Sprite implements GameObject {
     protected float x;
     protected float y;
     protected float halfWidth;
@@ -38,7 +38,9 @@ public class Sprite {
     protected float getHeight() {
         return 2f * halfHeight;
     }
-    void update(GameCanvas canvas, float deltaTime) {}
-    void render(GameCanvas canvas, Graphics g) {}
+    @Override
+    public void update(GameCanvas canvas, float deltaTime) {}
+    @Override
+    public void render(GameCanvas canvas, Graphics g) {}
 
 }

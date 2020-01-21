@@ -1,8 +1,11 @@
-package ru.gb.jtwo.lone.online.circles;
+package ru.gb.jtwo.lone.online.circles.balls;
+
+import ru.gb.jtwo.lone.online.circles.common.GameCanvas;
+import ru.gb.jtwo.lone.online.circles.common.GameObject;
 
 import java.awt.*;
 
-public class Background extends Sprite {
+public class Background implements GameObject {
     private float time;
     private static final float AMPLITUDE = 255f / 2f;
     private Color color;

@@ -1,14 +1,16 @@
-package ru.gb.jtwo.lone.online.circles;
+package ru.gb.jtwo.lone.online.circles.common;
+
+import ru.gb.jtwo.lone.online.circles.balls.MainCircles;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class GameCanvas extends JPanel {
 
-    MainCircles gameController;
+    CanvasListener gameController;
     long lastFrameTime;
 
-    GameCanvas(MainCircles gameController) {
+    public GameCanvas(CanvasListener gameController) {
         this.gameController = gameController;
         lastFrameTime = System.nanoTime();
     }
