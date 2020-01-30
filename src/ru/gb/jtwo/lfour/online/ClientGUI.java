@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class ClientGUI extends JFrame implements ActionListener, Thread.UncaughtExceptionHandler {
 
@@ -25,13 +27,14 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
     private final JButton btnSend = new JButton("Send");
 
     private final JList<String> userList = new JList<>();
+    private boolean shownIoErrors = false;
 
     private ClientGUI() {
         Thread.setDefaultUncaughtExceptionHandler(this);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setSize(WIDTH, HEIGHT);
-//        log.setEditable(false);
+        log.setEditable(false);
         JScrollPane scrollLog = new JScrollPane(log);
         JScrollPane scrollUser = new JScrollPane(userList);
         String[] users = {"user1", "user2", "user3", "user4", "user5",
@@ -39,6 +42,9 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
         userList.setListData(users);
         scrollUser.setPreferredSize(new Dimension(100, 0));
         cbAlwaysOnTop.addActionListener(this);
+        btnSend.addActionListener(this);
+        tfMessage.addActionListener(this);
+
 
         panelTop.add(tfIPAddress);
         panelTop.add(tfPort);
@@ -72,20 +78,63 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
         Object src = e.getSource();
         if (src == cbAlwaysOnTop) {
             setAlwaysOnTop(cbAlwaysOnTop.isSelected());
+        } else if (src == btnSend || src == tfMessage) {
+            sendMessage();
         } else {
             throw new RuntimeException("Unknown source: " + src);
         }
     }
 
+    private void sendMessage() {
+        String msg = tfMessage.getText();
+        String username = tfLogin.getText();
+        if ("".equals(msg)) return;
+        tfMessage.setText(null);
+        tfMessage.requestFocusInWindow();
+        putLog(String.format("%s: %s", username, msg));
+        wrtMsgToLogFile(msg, username);
+    }
+
+    private void wrtMsgToLogFile(String msg, String username) {
+        try (FileWriter out = new FileWriter("log.txt", true)) {
+            out.write(username + ": " + msg + "\n");
+            out.flush();
+        } catch (IOException e) {
+            if (!shownIoErrors) {
+                shownIoErrors = true;
+                showException(Thread.currentThread(), e);
+            }
+        }
+    }
+
+    private void putLog(String msg) {
+        if ("".equals(msg)) return;
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                log.append(msg + "\n");
+                log.setCaretPosition(log.getDocument().getLength());
+            }
+        });
+    }
+
+    private void showException(Thread t, Throwable e) {
+        String msg;
+        StackTraceElement[] ste = e.getStackTrace();
+        if (ste.length == 0)
+            msg = "Empty Stacktrace";
+        else {
+            msg = "Exception in " + t.getName() + " " +
+                    e.getClass().getCanonicalName() + ": " +
+                    e.getMessage() + "\n\t at " + ste[0];
+        }
+        JOptionPane.showMessageDialog(null, msg, "Exception", JOptionPane.ERROR_MESSAGE);
+    }
+
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         e.printStackTrace();
-        String msg;
-        StackTraceElement[] ste = e.getStackTrace();
-        msg = "Exception in " + t.getName() + " " +
-                e.getClass().getCanonicalName() + ": " +
-                e.getMessage() + "\n\t at " + ste[0];
-        JOptionPane.showMessageDialog(this, msg, "Exception", JOptionPane.ERROR_MESSAGE);
+        showException(t, e);
         System.exit(1);
     }
 }
