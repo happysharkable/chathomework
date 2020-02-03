@@ -44,7 +44,7 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
         cbAlwaysOnTop.addActionListener(this);
         btnSend.addActionListener(this);
         tfMessage.addActionListener(this);
-
+        btnLogin.addActionListener(this);
 
         panelTop.add(tfIPAddress);
         panelTop.add(tfPort);
@@ -80,6 +80,10 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
             setAlwaysOnTop(cbAlwaysOnTop.isSelected());
         } else if (src == btnSend || src == tfMessage) {
             sendMessage();
+        } else if (src == btnLogin){
+            for (long i = 0; i < 100000000000L; i++) {
+                long a = i * 123;
+            }
         } else {
             throw new RuntimeException("Unknown source: " + src);
         }
