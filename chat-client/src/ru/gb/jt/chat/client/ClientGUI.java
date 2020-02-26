@@ -8,9 +8,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ClientGUI extends JFrame implements ActionListener, Thread.UncaughtExceptionHandler, SocketThreadListener {
 
@@ -34,6 +36,11 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
     private final JList<String> userList = new JList<>();
     private boolean shownIoErrors = false;
     private SocketThread socketThread;
+
+    private final String historyFile = "history.txt";
+    private final int LOAD_LINES = 100;
+
+    private final String cursedWordsFile = "censored.txt";
 
     private ClientGUI() {
         Thread.setDefaultUncaughtExceptionHandler(this);
@@ -70,7 +77,57 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
         add(panelTop, BorderLayout.NORTH);
         add(panelBottom, BorderLayout.SOUTH);
 
+        // При создании нового клиентского окна подгрузить последние N линий из файла
+        loadHistory(LOAD_LINES);
+
         setVisible(true);
+    }
+
+    //  Прочитать файл и вернуть его содержимое в ArrayList
+    private ArrayList<String> readFileToList(String filename) {
+        ArrayList<String> list = new ArrayList<>();
+
+        try (FileInputStream fis = new FileInputStream(filename)) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String line;
+            while ((line = br.readLine()) != null) {
+                list.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    private void loadHistory(int lastLines) {
+        ArrayList<String> history = readFileToList(historyFile);
+
+        // Вывести последние N строк
+        if (LOAD_LINES <= history.size()) {
+            for (int i = history.size() - LOAD_LINES; i < history.size(); i++) {
+                putLog(history.get(i));
+            }
+        } else {
+            for (int i = 0; i < history.size(); i++) {
+                putLog(history.get(i));
+            }
+        }
+    }
+
+    private boolean checkCursedWords(String msg) {
+        ArrayList<String> cursedWords = readFileToList(cursedWordsFile);
+
+        for (String word : cursedWords) {
+            Pattern pattern = Pattern.compile("\\b" + word + "\\b");
+            Matcher matcher = pattern.matcher(msg);
+            if (matcher.find()) {
+                JOptionPane.showMessageDialog(this, "Word " + word + " is banned!");
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void connect() {
@@ -110,15 +167,19 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
     private void sendMessage() {
         String msg = tfMessage.getText();
         String username = tfLogin.getText();
-        if ("".equals(msg)) return;
+
+        // Сообщение не отправится, если оно пустое или содержит забаненное слово
+        if ("".equals(msg) || checkCursedWords(msg)) return;
         tfMessage.setText(null);
         tfMessage.requestFocusInWindow();
         socketThread.sendMessage(msg);
-        //wrtMsgToLogFile(msg, username);
+
+        // Записываем сообщение в файл истории
+        wrtMsgToLogFile(msg, username);
     }
 
     private void wrtMsgToLogFile(String msg, String username) {
-        try (FileWriter out = new FileWriter("log.txt", true)) {
+        try (FileWriter out = new FileWriter(historyFile, true)) {
             out.write(username + ": " + msg + "\n");
             out.flush();
         } catch (IOException e) {
