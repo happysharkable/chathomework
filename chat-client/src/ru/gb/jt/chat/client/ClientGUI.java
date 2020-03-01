@@ -172,7 +172,7 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
         if ("".equals(msg) || checkCursedWords(msg)) return;
         tfMessage.setText(null);
         tfMessage.requestFocusInWindow();
-        socketThread.sendMessage(msg);
+        socketThread.sendMessage(username + ": " + msg);
 
         // Записываем сообщение в файл истории
         wrtMsgToLogFile(msg, username);
