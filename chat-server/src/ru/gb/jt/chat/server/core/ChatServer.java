@@ -11,6 +11,8 @@ import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ChatServer implements ServerSocketThreadListener, SocketThreadListener {
 
@@ -18,6 +20,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     private ServerSocketThread server;
     private final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
     private Vector<SocketThread> clients = new Vector<>();
+    //private ExecutorService service = Executors.newSingleThreadExecutor();
 
     public ChatServer(ChatServerListener listener) {
         this.listener = listener;
@@ -34,6 +37,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         if (server == null || !server.isAlive()) {
             putLog("Server is not running");
         } else {
+            //service.shutdown();
             server.interrupt();
         }
     }
@@ -79,7 +83,6 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         putLog("Client connected");
         String name = "SocketThread " + socket.getInetAddress() + ":" + socket.getPort();
         new ClientThread(this, name, socket);
-
     }
 
     @Override
