@@ -1,0 +1,22 @@
+мар. 07, 2020 3:43:09 PM ru.gb.jt.chat.server.core.ChatServer onServerStart
+INFO: Server started
+мар. 07, 2020 3:43:17 PM ru.gb.jt.chat.server.core.ChatServer handleNonAuthMessage
+WARNING: Invalid login attempt: ivan
+мар. 07, 2020 3:43:21 PM ru.gb.jt.chat.server.core.ChatServer handleNonAuthMessage
+INFO: Client connected: ivan-igorevich
+мар. 07, 2020 3:43:29 PM ru.gb.jt.chat.server.core.ChatServer onSocketException
+INFO: Socket error: java.io.EOFException
+мар. 07, 2020 3:43:35 PM ru.gb.jt.chat.server.core.ChatServer onServerStop
+INFO: Server stopped
+мар. 07, 2020 3:46:39 PM ru.gb.jt.chat.server.core.ChatServer onServerStart
+INFO: Server started
+мар. 07, 2020 3:46:41 PM ru.gb.jt.chat.server.core.ChatServer onServerStop
+INFO: Server stopped
+мар. 07, 2020 3:47:43 PM ru.gb.jt.chat.server.core.ChatServer onServerStart
+INFO: Server started
+мар. 07, 2020 3:47:45 PM ru.gb.jt.chat.server.core.ChatServer onServerStop
+INFO: Server stopped
+мар. 07, 2020 3:49:43 PM ru.gb.jt.chat.server.core.ChatServer onServerStart
+INFO: Server started
+мар. 07, 2020 3:49:45 PM ru.gb.jt.chat.server.core.ChatServer onServerStop
+INFO: Server stopped
