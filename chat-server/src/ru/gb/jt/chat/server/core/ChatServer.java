@@ -6,6 +6,7 @@ import ru.gb.jt.network.ServerSocketThreadListener;
 import ru.gb.jt.network.SocketThread;
 import ru.gb.jt.network.SocketThreadListener;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DateFormat;
@@ -13,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.*;
 
 public class ChatServer implements ServerSocketThreadListener, SocketThreadListener {
 
@@ -21,9 +23,31 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     private final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
     private Vector<SocketThread> clients = new Vector<>();
     //private ExecutorService service = Executors.newSingleThreadExecutor();
+    private static final Logger logger = Logger.getLogger(ChatServer.class.getName());
+    private static Handler handler;
+    private static final String LOG_FILE = "chatserver.log";
 
     public ChatServer(ChatServerListener listener) {
         this.listener = listener;
+
+        setHandler(LOG_FILE);
+        setLogger();
+    }
+
+    private void setLogger() {
+        logger.setLevel(Level.ALL);
+        logger.addHandler(handler);
+        logger.setUseParentHandlers(false);
+    }
+
+    private void setHandler(String logfile) {
+        try {
+            handler = new FileHandler(logfile, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        handler.setFormatter(new SimpleFormatter());
+        handler.setLevel(Level.ALL);
     }
 
     public void start(int port) {
@@ -57,13 +81,14 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     public void onServerStart(ServerSocketThread thread) {
         putLog("Server thread started");
         SqlClient.connect();
+        logger.log(Level.INFO, "Server started");
     }
 
     @Override
     public void onServerStop(ServerSocketThread thread) {
         putLog("Server thread stopped");
         SqlClient.disconnect();
-
+        logger.log(Level.INFO, "Server stopped");
     }
 
     @Override
@@ -88,6 +113,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     @Override
     public void onServerException(ServerSocketThread thread, Throwable exception) {
         exception.printStackTrace();
+        logger.log(Level.WARNING, "Error occured: " + exception);
     }
 
     /**
@@ -132,10 +158,12 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
         if (nickname == null) {
             putLog("Invalid login attempt: " + login);
             client.authFail();
+            logger.log(Level.WARNING, "Invalid login attempt: " + login);
             return;
         }
         client.authAccept(nickname);
         sendToAuthClients(Library.getTypeBroadcast("Server", nickname + " connected"));
+        logger.log(Level.INFO, "Client connected: " + nickname);
     }
 
     private void handleAuthMessage(ClientThread client, String msg) {
@@ -153,6 +181,7 @@ public class ChatServer implements ServerSocketThreadListener, SocketThreadListe
     @Override
     public synchronized void onSocketException(SocketThread thread, Exception exception) {
         exception.printStackTrace();
+        logger.log(Level.INFO, "Socket error: " + exception);
     }
 
 
